@@ -1,0 +1,1694 @@
+```html
+<!DOCTYPE html>
+<html lang="th" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบวิเคราะห์ความน่าอยู่และความปลอดภัยของพื้นที่ทั่วไทย</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Kanit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Kanit', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white/85 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/60 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-xl shadow-lg shadow-sky-500/20">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-slate-900 via-sky-700 to-indigo-600 dark:from-white dark:via-slate-200 dark:to-sky-400 bg-clip-text text-transparent">
+                        GeoSafety & Livability
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">ประเมินความเสี่ยงและความน่าอยู่อาศัยรายพื้นที่ทั่วไทย</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center gap-2">
+                <!-- Theme Toggle Button (Light / Dark Mode) -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" title="สลับโหมดสว่าง / โหมดมืด" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-all border border-slate-300/70 dark:border-slate-600/50 active:scale-95">
+                    <i data-lucide="sun" id="iconSun" class="w-4 h-4 text-amber-500 hidden"></i>
+                    <i data-lucide="moon" id="iconMoon" class="w-4 h-4 text-sky-400"></i>
+                    <span id="themeText" class="hidden sm:inline">โหมดมืด</span>
+                </button>
+
+                <!-- GPS Location Button -->
+                <button onclick="useCurrentLocation()" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium bg-sky-50 hover:bg-sky-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-sky-700 dark:text-slate-200 rounded-lg transition-all border border-sky-200 dark:border-slate-600/50 active:scale-95">
+                    <i data-lucide="crosshair" class="w-4 h-4 text-sky-600 dark:text-sky-400"></i>
+                    <span class="hidden sm:inline">ตำแหน่งปัจจุบัน</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Search & Location Selection Section -->
+        <section class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm transition-colors duration-300">
+            <div class="max-w-4xl mx-auto text-center space-y-4">
+                <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">ตรวจสอบความปลอดภัยและดรรชนีความน่าอยู่ทั่วประเทศไทย</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">ค้นหาจังหวัด อำเภอ เขต หรือเลือกพื้นที่ตัวอย่างจากทุกภูมิภาคทั่วไทย</p>
+
+                <!-- Search Input Group & Province Selector -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Region / Province Dropdown -->
+                    <div class="relative">
+                        <select id="provinceSelect" onchange="selectLocationByDropdown()" class="w-full h-full px-4 py-3.5 bg-slate-50 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm appearance-none cursor-pointer transition-colors">
+                            <option value="">-- พื้นที่แนะนำทั่วไทย --</option>
+                            <optgroup label="กรุงเทพฯ และปริมณฑล">
+                                <option value="sukhumvit">กทม. - สุขุมวิท / วัฒนา</option>
+                                <option value="ari">กทม. - อารีย์ / พญาไท</option>
+                                <option value="bangsue">กทม. - บางซื่อ / เตาปูน</option>
+                                <option value="latphrao">กทม. - ลาดพร้าว / โชคชัย 4</option>
+                                <option value="nonthaburi">นนทบุรี - ปากเกร็ด / แจ้งวัฒนะ</option>
+                            </optgroup>
+                            <optgroup label="ภาคเหนือ">
+                                <option value="chiangmai">เชียงใหม่ - นิมมานเหมินท์ / เมือง</option>
+                                <option value="chiangrai">เชียงราย - แม่สาย / เมืองเชียงราย</option>
+                            </optgroup>
+                            <optgroup label="ภาคตะวันออกเฉียงเหนือ (อีสาน)">
+                                <option value="korat">นครราชสีมา - ในเมือง / โคราช</option>
+                                <option value="khonkaen">ขอนแก่น - กังสดาล / มข.</option>
+                                <option value="udon">อุดรธานี - เมืองอุดรธานี</option>
+                            </optgroup>
+                            <optgroup label="ภาคตะวันออก">
+                                <option value="pattaya">ชลบุรี - พัทยา / บางละมุง</option>
+                                <option value="rayong">ระยอง - มาบตาพุด / เมืองระยอง</option>
+                            </optgroup>
+                            <optgroup label="ภาคใต้">
+                                <option value="phuket">ภูเก็ต - ตลาดใหญ่ / เมืองภูเก็ต</option>
+                                <option value="hatyai">สงขลา - หาดใหญ่</option>
+                            </optgroup>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 dark:text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Text Search Input -->
+                    <div class="relative flex items-center sm:col-span-2">
+                        <i data-lucide="map-pin" class="absolute left-4 w-5 h-5 text-slate-400"></i>
+                        <input type="text" id="searchInput" onkeypress="if(event.key === 'Enter') performSearch()" placeholder="ค้นหาได้ทุกที่ในไทย เช่น เชียงคาน, ปาย, หัวหิน, ครบุรี, เบตง, อยุธยา..." 
+                               class="w-full pl-12 pr-28 py-3.5 bg-slate-50 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm">
+                        <button id="searchBtn" onclick="performSearch()" class="absolute right-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium text-sm rounded-lg transition-all shadow-md active:scale-95 flex items-center gap-1.5">
+                            <span>ค้นหา</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Preset Tags across Thailand -->
+                <div class="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs">
+                    <span class="text-slate-500 dark:text-slate-400">พื้นที่ยอดนิยมทั่วไทย:</span>
+                    <button onclick="loadLocationData('sukhumvit')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">สุขุมวิท (กทม.)</button>
+                    <button onclick="loadLocationData('chiangmai')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">นิมมานฯ (เชียงใหม่)</button>
+                    <button onclick="loadLocationData('korat')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">ในเมือง (โคราช)</button>
+                    <button onclick="loadLocationData('khonkaen')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">มข. (ขอนแก่น)</button>
+                    <button onclick="loadLocationData('pattaya')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">พัทยา (ชลบุรี)</button>
+                    <button onclick="loadLocationData('phuket')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600/40 transition">เมืองภูเก็ต (ภูเก็ต)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Results Dashboard -->
+        <div id="dashboard" class="space-y-6">
+            
+            <!-- Location Header & Main Score Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Overall Score Card -->
+                <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-sm dark:shadow-lg transition-colors duration-300">
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div>
+                        <div class="flex justify-between items-start mb-4 gap-2">
+                            <div>
+                                <span class="text-xs font-semibold tracking-wider uppercase text-sky-600 dark:text-sky-400">คะแนนภาพรวม</span>
+                                <h3 id="locTitle" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">แขวงคลองเตยเหนือ, เขตวัฒนา</h3>
+                                <p id="locSub" class="text-xs text-slate-500 dark:text-slate-400 mt-1">กรุงเทพมหานคร • พิกัด: 13.7367, 100.5604</p>
+                            </div>
+                            <span id="riskBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
+                                เสี่ยงต่ำ
+                            </span>
+                        </div>
+
+                        <!-- Big Rating Display -->
+                        <div class="flex items-baseline space-x-3 my-6">
+                            <span id="overallScore" class="text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">84</span>
+                            <span class="text-slate-400 text-lg">/ 100</span>
+                            <span id="livabilityGrade" class="ml-auto text-xs sm:text-sm font-medium px-3 py-1 bg-slate-100 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 rounded-lg">
+                                น่าอยู่อาศัยระดับดีมาก (A)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Mini Summary Indicators -->
+                    <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-200 dark:border-slate-700/50 text-center">
+                        <div class="p-2 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-transparent">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">ความปลอดภัย</p>
+                            <p id="quickSafety" class="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">ดีมาก (88%)</p>
+                        </div>
+                        <div class="p-2 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-transparent">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">สิ่งแวดล้อม</p>
+                            <p id="quickEnv" class="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400">ปานกลาง (72%)</p>
+                        </div>
+                        <div class="p-2 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-transparent">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">ความสะดวก</p>
+                            <p id="quickConvenience" class="text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-400">ดีเยี่ยม (95%)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Alert & Highlights Card -->
+                <div class="lg:col-span-2 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-300">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i data-lucide="bell" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+                            ข้อควรระวัง & ข้อมูลสำคัญในพื้นที่
+                        </h4>
+
+                        <div id="alertBoxList" class="space-y-3">
+                            <!-- Dynamic Alerts will be injected here -->
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                            อัปเดตข้อมูลล่าสุด: วันนี้ 14:00 น.
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="database" class="w-3.5 h-3.5 text-slate-400"></i>
+                            อ้างอิง: ข้อมูลเปิดภาครัฐ & เซ็นเซอร์วัดคุณภาพอากาศ
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Metrics Grid (5 Key Dimensions) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Dimension 1: Safety & Crime -->
+                <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-slate-600 transition shadow-sm dark:shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-200 dark:border-indigo-500/20">
+                                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900 dark:text-white">ความปลอดภัยและอาชญากรรม</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">สถิติเหตุและกล้อง CCTV</p>
+                            </div>
+                        </div>
+                        <span id="scoreSafety" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">88/100</span>
+                    </div>
+                    
+                    <div class="space-y-3 text-xs sm:text-sm">
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ความหนาแน่นกล้อง CCTV</span>
+                                <span class="font-medium text-emerald-600 dark:text-emerald-400">หนาแน่นสูง</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>สถิติอาชญากรรม (ย้อนหลัง 1 ปี)</span>
+                                <span class="font-medium text-emerald-600 dark:text-emerald-400">ต่ำมาก</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ความสว่างของไฟถนนช่วงกลางคืน</span>
+                                <span class="font-medium text-sky-600 dark:text-sky-400">เพียงพอ</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 dark:bg-sky-400 h-full rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 2: Natural Hazards & Environment -->
+                <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-slate-600 transition shadow-sm dark:shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-500/20">
+                                <i data-lucide="cloud-rain" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900 dark:text-white">ภัยธรรมชาติและมลพิษ</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">น้ำท่วมซ้ำซาก & ค่าฝุ่น PM2.5</p>
+                            </div>
+                        </div>
+                        <span id="scoreEnv" class="text-lg font-bold text-amber-600 dark:text-amber-400">72/100</span>
+                    </div>
+                    
+                    <div class="space-y-3 text-xs sm:text-sm">
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ความเสี่ยงน้ำท่วมขัง (ขอบทาง)</span>
+                                <span id="floodStatus" class="font-medium text-amber-600 dark:text-amber-400">ปานกลาง (ระบายใน 1 ชม.)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div id="floodBar" class="bg-amber-500 dark:bg-amber-400 h-full rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ดรรชนีคุณภาพอากาศ (PM2.5)</span>
+                                <span id="pmStatus" class="font-medium text-emerald-600 dark:text-emerald-400">38 µg/m³ (ปานกลาง)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div id="pmBar" class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ระดับความเสี่ยงแผ่นดินไหว</span>
+                                <span class="font-medium text-emerald-600 dark:text-emerald-400">ต่ำมาก</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 3: Infrastructure & Healthcare -->
+                <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-slate-600 transition shadow-sm dark:shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-500/20">
+                                <i data-lucide="hospital" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900 dark:text-white">สาธารณูปโภคและสุขภาพ</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">การเข้าถึง รพ. และสถานีตำรวจ</p>
+                            </div>
+                        </div>
+                        <span id="scoreInfra" class="text-lg font-bold text-rose-600 dark:text-rose-400">95/100</span>
+                    </div>
+                    
+                    <div class="space-y-3 text-xs sm:text-sm">
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ระยะทางถึง รพ. ใหญ่ที่ใกล้สุด</span>
+                                <span id="hospitalDist" class="font-medium text-emerald-600 dark:text-emerald-400">1.2 กม. (&lt; 5 นาที)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ระยะทางถึงสถานีตำรวจ / ดับเพลิง</span>
+                                <span id="policeDist" class="font-medium text-emerald-600 dark:text-emerald-400">800 เมตร</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ความมั่นคงของระบบไฟฟ้าและน้ำประปา</span>
+                                <span class="font-medium text-emerald-600 dark:text-emerald-400">เสถียรภาพสูง</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 98%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 4: Mobility & Transit -->
+                <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-slate-600 transition shadow-sm dark:shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl border border-sky-200 dark:border-sky-500/20">
+                                <i data-lucide="bus" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900 dark:text-white">การเดินทางและการจราจร</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">ระบบขนส่งสาธารณะ & รถติด</p>
+                            </div>
+                        </div>
+                        <span id="scoreTransit" class="text-lg font-bold text-sky-600 dark:text-sky-400">92/100</span>
+                    </div>
+                    
+                    <div class="space-y-3 text-xs sm:text-sm">
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>เข้าถึง BTS / MRT / ขนส่งสาธารณะ</span>
+                                <span id="transitAccess" class="font-medium text-emerald-600 dark:text-emerald-400">สะดวกมาก (เดินได้)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ความหนาแน่นการจราจร (ชั่วโมงเร่งด่วน)</span>
+                                <span id="trafficStatus" class="font-medium text-amber-600 dark:text-amber-400">หนาแน่นมาก</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div id="trafficBar" class="bg-amber-500 dark:bg-amber-400 h-full rounded-full" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300 mb-1">
+                                <span>ทางเดินเท้า (Pedestrian Friendly)</span>
+                                <span class="font-medium text-sky-600 dark:text-sky-400">มีฟุตบาทกว้าง/ปลอดภัย</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 dark:bg-sky-400 h-full rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 5: Green Spaces & Environment Quality -->
+                <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 hover:border-slate-300 dark:hover:border-slate-600 transition shadow-sm dark:shadow-md md:col-span-2 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-200 dark:border-emerald-500/20">
+                                <i data-lucide="trees" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-900 dark:text-white">พื้นที่สีเขียว & สภาพแวดล้อมน่าอยู่</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">สวนสาธารณะ, ระดับเสียงรบกวน, และสังคมรอบข้าง</p>
+                            </div>
+                        </div>
+                        <span id="scoreGreen" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">78/100</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/30">
+                            <div class="flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-300 font-medium">
+                                <i data-lucide="tree-pine" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                                <span>ระยะถึงสวนสาธารณะใกล้ที่สุด</span>
+                            </div>
+                            <p id="parkDist" class="text-slate-900 dark:text-slate-100 font-semibold text-sm">สวนเบญจกิตติ (1.1 กม.)</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">มีพื้นที่ออกกำลังกายและเส้นทางวิ่ง</p>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/30">
+                            <div class="flex items-center gap-2 mb-1 text-slate-700 dark:text-slate-300 font-medium">
+                                <i data-lucide="volume-2" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+                                <span>มลพิษทางเสียง (Noise Level)</span>
+                            </div>
+                            <p id="noiseStatus" class="text-slate-900 dark:text-slate-100 font-semibold text-sm">ปานกลาง ~ 62 dB</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">มีเสียงจราจรช่วงกลางวัน ค่อนข้างสงบช่วงดึก</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Simulated Interactive Safety Map Section -->
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 transition-colors duration-300">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="map" class="w-5 h-5 text-sky-600 dark:text-sky-400"></i>
+                            แผนที่จำลองความปลอดภัยและสิ่งอำนวยความสะดวก
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">แสดงจุดสำคัญ สถานีตำรวจ โรงพยาบาล และพื้นที่เฝ้าระวังภัยในระยะ 2 กม.</p>
+                    </div>
+
+                    <!-- Map Layer Controls -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <button onclick="toggleMapFilter('all')" id="btnFilterAll" class="px-3 py-1.5 rounded-lg bg-sky-600 text-white font-medium shadow">ทั้งหมด</button>
+                        <button onclick="toggleMapFilter('safety')" id="btnFilterSafety" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-medium transition">สถานีตำรวจ/กล้อง</button>
+                        <button onclick="toggleMapFilter('health')" id="btnFilterHealth" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-medium transition">รพ./กู้ภัย</button>
+                        <button onclick="toggleMapFilter('risk')" id="btnFilterRisk" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-medium transition">จุดเสี่ยงน้ำท่วม</button>
+                    </div>
+                </div>
+
+                <!-- Simulated Map UI Container -->
+                <div class="relative w-full h-80 sm:h-96 bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700/80 flex items-center justify-center transition-colors">
+                    
+                    <!-- Background Grid Pattern to look like a map -->
+                    <div class="absolute inset-0 opacity-30 dark:opacity-20" style="background-image: radial-gradient(#0284c7 1px, transparent 1px); background-size: 24px 24px;"></div>
+                    
+                    <!-- Simulated Roads -->
+                    <svg class="absolute inset-0 w-full h-full opacity-40 dark:opacity-30 stroke-slate-400 dark:stroke-slate-500" stroke-width="3" fill="none">
+                        <path d="M 0 120 Q 200 80 500 200 T 1000 150" />
+                        <path d="M 150 0 Q 180 200 220 400" />
+                        <path d="M 450 0 Q 400 250 480 400" stroke-dasharray="6,6" />
+                        <path d="M 0 300 L 1000 250" stroke-width="5" class="stroke-sky-500/60 dark:stroke-sky-500/40" />
+                    </svg>
+
+                    <!-- Center Target Marker (User Location) -->
+                    <div class="absolute z-20 flex flex-col items-center transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+                        <span class="relative flex h-5 w-5">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-5 w-5 bg-sky-500 border-2 border-white"></span>
+                        </span>
+                        <span class="mt-1 px-2 py-0.5 bg-white/95 dark:bg-slate-900/90 border border-sky-400 dark:border-sky-500/50 text-[10px] text-sky-700 dark:text-sky-300 font-semibold rounded-md shadow-md">
+                            ตำแหน่งของคุณ
+                        </span>
+                    </div>
+
+                    <!-- Dynamic Map Pins -->
+                    <div id="mapPinsContainer" class="absolute inset-0 z-10">
+                        <!-- Pins injected via JavaScript -->
+                    </div>
+
+                    <!-- Map Legend -->
+                    <div class="absolute bottom-3 right-3 bg-white/95 dark:bg-slate-900/90 backdrop-blur border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-[11px] text-slate-700 dark:text-slate-300 space-y-1 z-20 shadow-lg">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span>สถานีตำรวจ / CCTV ชุมชน</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span>สถานพยาบาล / กู้ภัย</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                            <span>จุดเฝ้าระวังน้ำท่วมขัง / ความเสี่ยง</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Voting & Public Opinion System -->
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 transition-colors duration-300">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700/60 pb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="vote" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                            ระบบลงคะแนนเสียงจากคนในพื้นที่ (Community Voting)
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ร่วมประเมินและให้คะแนนความน่าอยู่ ความปลอดภัยจริงของ <span id="voteAreaName" class="text-sky-600 dark:text-sky-400 font-medium">พื้นที่นี้</span></p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/70 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700/50">
+                        <div class="text-right">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">ผลโหวตจากประชาชน</p>
+                            <p class="text-sm font-bold text-slate-900 dark:text-white"><span id="totalVotesCount">142</span> เสียงโหวต</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="flex items-center gap-1 text-amber-500 dark:text-amber-400 font-bold text-lg">
+                            <i data-lucide="star" class="w-5 h-5 fill-amber-500 dark:fill-amber-400"></i>
+                            <span id="communityAvgRating">4.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: Cast Your Vote Form -->
+                    <div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 space-y-4">
+                        <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200">ร่วมลงคะแนนเสียงของคุณ</h4>
+                        
+                        <!-- Star Rating Selector -->
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 mb-2">ให้คะแนนความน่าอยู่และความปลอดภัยโดยรวม:</label>
+                            <div class="flex flex-wrap items-center gap-2" id="starSelector">
+                                <button type="button" onclick="setRating(1)" class="star-btn p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition" data-val="1"><i data-lucide="star" class="w-6 h-6"></i></button>
+                                <button type="button" onclick="setRating(2)" class="star-btn p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition" data-val="2"><i data-lucide="star" class="w-6 h-6"></i></button>
+                                <button type="button" onclick="setRating(3)" class="star-btn p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition" data-val="3"><i data-lucide="star" class="w-6 h-6"></i></button>
+                                <button type="button" onclick="setRating(4)" class="star-btn p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition" data-val="4"><i data-lucide="star" class="w-6 h-6"></i></button>
+                                <button type="button" onclick="setRating(5)" class="star-btn p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition" data-val="5"><i data-lucide="star" class="w-6 h-6"></i></button>
+                                <span id="selectedRatingText" class="ml-1 text-xs font-medium text-amber-600 dark:text-amber-400">กรุณาเลือกดาว</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Issue Tags -->
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 mb-2">จุดเด่นหรือข้อสังเกตในพื้นที่ (เลือกได้มากกว่า 1):</label>
+                            <div class="flex flex-wrap gap-2" id="voteTagsContainer">
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition">👍 เดินทางสะดวก</button>
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition">🛡️ ปลอดภัย ไฟสว่าง</button>
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500 transition">🍜 ของกินหาง่าย</button>
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-500 transition">🌊 ฝนตกน้ำรอระบาย</button>
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-500 transition">🚗 รถติดช่วงเร่งด่วน</button>
+                                <button type="button" onclick="toggleVoteTag(this)" class="vote-tag px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-500 transition">🌫️ ฝุ่นควัน/มลพิษ</button>
+                            </div>
+                        </div>
+
+                        <!-- Comment Input -->
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">ความคิดเห็นเพิ่มเติมจากผู้อยู่อาศัย / ผู้เคยเดินทาง:</label>
+                            <textarea id="voteCommentInput" rows="2" placeholder="เล่าประสบการณ์จริงในพื้นที่นี้ เช่น ความปลอดภัยตอนกลางคืน สภาพการจราจร..." class="w-full p-3 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+
+                        <button onclick="submitCommunityVote()" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-medium text-sm rounded-xl shadow-lg transition active:scale-[0.99] flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            ส่งคะแนนเสียงและรีวิวพื้นที่
+                        </button>
+                    </div>
+
+                    <!-- Right: Vote Breakdown & Recent Reviews -->
+                    <div class="space-y-4 flex flex-col justify-between">
+                        <!-- Vote Breakdown Bars -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 space-y-2.5">
+                            <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">สัดส่วนคะแนนโหวตจากผู้ใช้งาน</h4>
+                            <div id="voteDistributionBars" class="space-y-2 text-xs">
+                                <!-- Dynamic bars injected via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Recent User Reviews List -->
+                        <div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 flex-1 flex flex-col">
+                            <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">ความคิดเห็นล่าสุดจากคนในพื้นที่</h4>
+                            <div id="communityReviewsList" class="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                                <!-- Reviews injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation & Safety Guidelines -->
+            <div class="bg-white dark:bg-gradient-to-r dark:from-slate-800 dark:to-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6 shadow-sm dark:shadow-xl transition-colors duration-300">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                    คำแนะนำในการอยู่อาศัยและการเดินทางในพื้นที่นี้
+                </h3>
+                <ul id="recommendationList" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700 dark:text-slate-300">
+                    <!-- Dynamic Checklist items injected here -->
+                </ul>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 py-5 mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>© 2026 GeoSafety & Livability Thailand • ระบบประเมินความเสี่ยงและความน่าอยู่รายพื้นที่</p>
+    </footer>
+
+    <!-- Simple Notification Toast Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i data-lucide="info" class="w-5 h-5 text-sky-600 dark:text-sky-400"></i>
+        <span id="toastMsg" class="text-sm font-medium">ข้อความแจ้งเตือน</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let currentLocKey = 'sukhumvit';
+        let selectedUserRating = 0;
+
+        // Theme Toggle (Light / Dark Mode)
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const isDark = htmlEl.classList.contains('dark');
+            const iconSun = document.getElementById('iconSun');
+            const iconMoon = document.getElementById('iconMoon');
+            const themeText = document.getElementById('themeText');
+
+            if (isDark) {
+                htmlEl.classList.remove('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                themeText.innerText = 'โหมดสว่าง';
+                showToast('เปลี่ยนเป็นโหมดสว่าง (Light Mode) แล้ว');
+            } else {
+                htmlEl.classList.add('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                themeText.innerText = 'โหมดมืด';
+                showToast('เปลี่ยนเป็นโหมดมืด (Dark Mode) แล้ว');
+            }
+        }
+
+        // Location Database Mock Data across Thailand
+        const locationData = {
+            sukhumvit: {
+                title: "แขวงคลองเตยเหนือ, เขตวัฒนา",
+                subtitle: "กรุงเทพมหานคร (ภาคกลาง) • พิกัด: 13.7367, 100.5604",
+                overall: 84,
+                grade: "น่าอยู่อาศัยระดับดีมาก (A)",
+                riskBadge: { text: "เสี่ยงต่ำ", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+                quick: { safety: "ดีมาก (88%)", env: "ปานกลาง (72%)", convenience: "ดีเยี่ยม (95%)" },
+                scores: { safety: 88, env: 72, infra: 95, transit: 92, green: 78 },
+                flood: { status: "ต่ำ (ระบายไว)", percent: 80 },
+                pm: { status: "32 µg/m³ (ดี)", percent: 82 },
+                hospital: "รพ.บำรุงราษฎร์ (800 ม.)",
+                police: "สน.ลุมพินี (1.2 กม.)",
+                transit: "BTS นานา / อโศก (เดิน 3-5 นาที)",
+                traffic: { status: "หนาแน่นมากช่วงพีค", percent: 45 },
+                park: "สวนเบญจกิตติ (1.1 กม.)",
+                noise: "คึกคักช่วงกลางคืน ~ 68 dB",
+                alerts: [
+                    { icon: "alert-triangle", color: "text-amber-500 dark:text-amber-400", title: "การจราจรติดขัดสูง", desc: "ถนนสุขุมวิทมักมีรถสะสมหนาแน่นช่วงเวลา 07:30 - 09:30 น. และ 17:00 - 19:30 น." },
+                    { icon: "shield-check", color: "text-emerald-600 dark:text-emerald-400", title: "พื้นที่ความปลอดภัยสูง", desc: "มีกล้อง CCTV ความละเอียดสูงครอบคลุมทุกตรอกซอกซอย และมีสายตรวจผ่านสม่ำเสมอ" }
+                ],
+                recommendations: [
+                    "แนะนำให้ใช้บริการรถไฟฟ้า BTS/MRT เป็นหลักในช่วงชั่วโมงเร่งด่วนเพื่อหลีกเลี่ยงรถติด",
+                    "คอนโดและที่พักในซอยลึกควรตรวจสอบระยะทางเดินไปยังปากซอยช่วงค่ำ",
+                    "เป็นพื้นที่ย่านธุรกิจ มีสิ่งอำนวยความสะดวก 24 ชั่วโมง เหมาะกับคนทำงานเมือง",
+                    "มีสวนเบญจกิตติใกล้เคียง เหมาะสำหรับวิ่งและออกกำลังกายช่วงเย็น"
+                ],
+                pins: [
+                    { type: "safety", label: "สน.ลุมพินี", top: "25%", left: "30%" },
+                    { type: "health", label: "รพ.บำรุงราษฎร์", top: "40%", left: "65%" },
+                    { type: "safety", label: "ป้อมตำรวจอโศก", top: "70%", left: "75%" },
+                    { type: "risk", label: "จุดระบายน้ำแยกอโศก", top: "60%", left: "45%" }
+                ],
+                votes: {
+                    total: 148,
+                    avg: 4.4,
+                    counts: { 5: 82, 4: 45, 3: 15, 2: 4, 1: 2 },
+                    reviews: [
+                        { user: "คนทำงานย่านอโศก", rating: 5, tags: ["👍 เดินทางสะดวก", "🛡️ ปลอดภัย ไฟสว่าง"], comment: "เดินกลับคอนโดตอนดึกค่อนข้างอุ่นใจ คนพลุกพล่านตลอด ใกล้รถไฟฟ้าทั้ง BTS และ MRT", time: "2 ชั่วโมงที่แล้ว" },
+                        { user: "ผู้อาศัยซอย 23", rating: 4, tags: ["🚗 รถติดช่วงเร่งด่วน", "🍜 ของกินหาง่าย"], comment: "ของกินเยอะมาก 24 ชม. แต่ช่วงเย็นรถติดหนัก แนะนำใช้รถไฟฟ้า", time: "1 วันที่แล้ว" }
+                    ]
+                }
+            },
+            ari: {
+                title: "แขวงพญาไท, เขตพญาไท",
+                subtitle: "กรุงเทพมหานคร (ภาคกลาง) • พิกัด: 13.7797, 100.5447",
+                overall: 89,
+                grade: "น่าอยู่อาศัยระดับดีเยี่ยม (A+)",
+                riskBadge: { text: "เสี่ยงต่ำมาก", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+                quick: { safety: "ดีเยี่ยม (92%)", env: "ดี (85%)", convenience: "ดีมาก (90%)" },
+                scores: { safety: 92, env: 85, infra: 90, transit: 88, green: 85 },
+                flood: { status: "น้อยมาก", percent: 90 },
+                pm: { status: "28 µg/m³ (ดีมาก)", percent: 88 },
+                hospital: "รพ.พญาไท 2 (1.0 กม.)",
+                police: "สน.บางซื่อ (1.5 กม.)",
+                transit: "BTS อารีย์ (เดิน 5 นาที)",
+                traffic: { status: "ปานกลาง", percent: 70 },
+                park: "สวนจตุจักร (2.0 กม.) / สวนในซอย",
+                noise: "เงียบสงบในซอย ~ 52 dB",
+                alerts: [
+                    { icon: "check-circle", color: "text-emerald-600 dark:text-emerald-400", title: "ชุมชนน่าอยู่และปลอดภัยสูง", desc: "สภาพแวดล้อมเป็นมิตร มีร้านอาหาร คาเฟ่ และร้านค้าชุมชนหลากหลาย" },
+                    { icon: "info", color: "text-sky-600 dark:text-sky-400", title: "ซอยย่อยแคบ", desc: "ซอยอารีย์บางจุดมีที่จอดรถจำกัด สวนกันลำบากในชั่วโมงเร่งด่วน" }
+                ],
+                recommendations: [
+                    "เหมาะสำหรับการอยู่อาศัยแบบครอบครัวหรือคนทำงานที่ต้องการความสงบ",
+                    "สามารถเดินทางด้วยจักรยานหรือเดินเท้าภายในซอยได้อย่างปลอดภัย",
+                    "ใกล้โรงพยาบาลชั้นนำหลายแห่ง"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.พญาไท 2", top: "35%", left: "25%" },
+                    { type: "safety", label: "จุดตรวจบางซื่อ", top: "20%", left: "60%" },
+                    { type: "health", label: "คลินิกอารีย์", top: "65%", left: "50%" }
+                ],
+                votes: {
+                    total: 112,
+                    avg: 4.7,
+                    counts: { 5: 85, 4: 20, 3: 5, 2: 1, 1: 1 },
+                    reviews: [
+                        { user: "ชาวอารีย์สัมพันธ์", rating: 5, tags: ["🛡️ ปลอดภัย ไฟสว่าง", "🍜 ของกินหาง่าย"], comment: "บรรยากาศดีมาก ต้นไม้เยอะ เงียบสงบในซอยแต่เดินออกมาปากซอยก็เจอของกินเพียบ", time: "5 ชั่วโมงที่แล้ว" }
+                    ]
+                }
+            },
+            bangsue: {
+                title: "แขวงบางซื่อ, เขตบางซื่อ",
+                subtitle: "กรุงเทพมหานคร (ภาคกลาง) • พิกัด: 13.8037, 100.5385",
+                overall: 76,
+                grade: "น่าอยู่อาศัยระดับปานกลาง (B+)",
+                riskBadge: { text: "เสี่ยงปานกลาง", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ปานกลาง (78%)", env: "ปานกลาง (70%)", convenience: "ดีมาก (88%)" },
+                scores: { safety: 78, env: 70, infra: 88, transit: 95, green: 65 },
+                flood: { status: "ปานกลาง (เฝ้าระวังฝนตกหนัก)", percent: 60 },
+                pm: { status: "45 µg/m³ (เริ่มมีผลกระทบ)", percent: 55 },
+                hospital: "รพ.บางโพ (1.2 กม.)",
+                police: "สน.เตาปูน (900 ม.)",
+                transit: "สถานีกลางกรุงเทพอภิวัฒน์ / MRT เตาปูน",
+                traffic: { status: "หนาแน่นบริเวณจุดตัดการจราจร", percent: 55 },
+                park: "สวนวชิรเบญจทัศ (สวนรถไฟ 2.5 กม.)",
+                noise: "มีเสียงจากสถานีรถไฟ/ก่อสร้าง ~ 70 dB",
+                alerts: [
+                    { icon: "alert-triangle", color: "text-amber-500 dark:text-amber-400", title: "พื้นที่เฝ้าระวังมลพิษทางเสียงและฝุ่น", desc: "เนื่องจากใกล้ศูนย์กลางขนส่งและโครงการก่อสร้างระบบราง" },
+                    { icon: "zap", color: "text-sky-600 dark:text-sky-400", title: "จุดเชื่อมต่อคมนาคมขนาดใหญ่", desc: "เดินทางสะดวกด้วยรถไฟความเร็วสูง รถไฟฟ้า MRT สายสีม่วงและสายสีน้ำเงิน" }
+                ],
+                recommendations: [
+                    "ควรเลือกระบบกรองอากาศในที่พักอาศัยเนื่องจากระดับ PM2.5 ค่อนข้างสูงในบางฤดู",
+                    "ใช้ประโยชน์จาก MRT เตาปูน และสถานีกลางกรุงเทพอภิวัฒน์เพื่อเดินทางออกนอกเมือง",
+                    "ตรวจสอบระบบระบายน้ำของโครงการที่พักอาศัยก่อนตัดสินใจซื้อ/เช่า"
+                ],
+                pins: [
+                    { type: "safety", label: "สน.เตาปูน", top: "30%", left: "40%" },
+                    { type: "health", label: "รพ.บางโพ", top: "55%", left: "20%" },
+                    { type: "risk", label: "เฝ้าระวังน้ำขังอุโมงค์บางซื่อ", top: "75%", left: "65%" }
+                ],
+                votes: {
+                    total: 89,
+                    avg: 3.9,
+                    counts: { 5: 30, 4: 32, 3: 18, 2: 6, 1: 3 },
+                    reviews: [
+                        { user: "คนใช้ MRT เตาปูน", rating: 4, tags: ["👍 เดินทางสะดวก", "🌫️ ฝุ่นควัน/มลพิษ"], comment: "ต่อรถไฟฟ้าไปได้หลายสายมาก แต่ช่วงก่อสร้างฝุ่นเยอะหน่อย", time: "2 วันที่แล้ว" }
+                    ]
+                }
+            },
+            latphrao: {
+                title: "แขวงลาดพร้าว, เขตลาดพร้าว",
+                subtitle: "กรุงเทพมหานคร (ภาคกลาง) • พิกัด: 13.7946, 100.5979",
+                overall: 71,
+                grade: "น่าอยู่อาศัยระดับพอใช้ (B)",
+                riskBadge: { text: "เฝ้าระวังน้ำท่วม", class: "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30" },
+                quick: { safety: "ดี (82%)", env: "เสี่ยงน้ำท่วม (55%)", convenience: "ดี (80%)" },
+                scores: { safety: 82, env: 55, infra: 80, transit: 75, green: 68 },
+                flood: { status: "เสี่ยงสูง (ท่วมขังรอการระบายเมื่อฝนหนัก)", percent: 40 },
+                pm: { status: "40 µg/m³ (ปานกลาง)", percent: 65 },
+                hospital: "รพ.เปาโล โชคชัย 4 (1.5 กม.)",
+                police: "สน.โชคชัย (1.1 กม.)",
+                transit: "รถไฟฟ้าสายสีเหลือง (สถานีโชคชัย 4)",
+                traffic: { status: "รถติดสะสมในซอยโชคชัย 4", percent: 40 },
+                park: "สวนสาธารณะบึงลาดพร้าว 71",
+                noise: "ปานกลาง ~ 60 dB",
+                alerts: [
+                    { icon: "cloud-rain", color: "text-rose-600 dark:text-rose-400", title: "พื้นที่เสี่ยงน้ำท่วมขัง", desc: "เมื่อมีฝนตกหนักเกิน 60 มม. ถนนสายหลักและซอยแยกอาจมีน้ำขังสูง 10-20 ซม." },
+                    { icon: "shopping-bag", color: "text-emerald-600 dark:text-emerald-400", title: "อุดมสมบูรณ์ด้านอาหาร", desc: "มีตลาดสด ร้านอาหาร ตลาดลาดพร้าว และสิ่งอำนวยความสะดวกครบถ้วน" }
+                ],
+                recommendations: [
+                    "ควรเตรียมพร้อมระบบกั้นน้ำหรือเลี่ยงการจอดรถใต้ดินในพื้นที่ลุ่มต่ำช่วงฤดูฝน",
+                    "วางแผนการเดินทางล่วงหน้าในวันฝนตกหนัก เนื่องจากเส้นทางหลักมักชะลอตัวอย่างมาก",
+                    "ใช้บริการรถไฟฟ้าสายสีเหลืองเพื่อเลี่ยงการจราจรติดขัดบนถนนลาดพร้าว"
+                ],
+                pins: [
+                    { type: "risk", label: "จุดน้ำท่วมขังซอย 64", top: "45%", left: "35%" },
+                    { type: "risk", label: "จุดระบายน้ำคลองลาดพร้าว", top: "65%", left: "70%" },
+                    { type: "safety", label: "สน.โชคชัย", top: "25%", left: "55%" },
+                    { type: "health", label: "รพ.เปาโล โชคชัย 4", top: "35%", left: "20%" }
+                ],
+                votes: {
+                    total: 134,
+                    avg: 3.7,
+                    counts: { 5: 38, 4: 44, 3: 30, 2: 15, 1: 7 },
+                    reviews: [
+                        { user: "เด็กโชคชัย 4", rating: 4, tags: ["🍜 ของกินหาง่าย", "🌊 ฝนตกน้ำรอระบาย"], comment: "ของกินอร่อยและถูกมาก แต่ถ้าฝนตกหนักต้องรีบกลับบ้านก่อนน้ำขัง", time: "3 ชั่วโมงที่แล้ว" }
+                    ]
+                }
+            },
+            nonthaburi: {
+                title: "ต.บางพูด (แจ้งวัฒนะ - ปากเกร็ด), อ.ปากเกร็ด",
+                subtitle: "จ.นนทบุรี (ปริมณฑล) • พิกัด: 13.9045, 100.5293",
+                overall: 80,
+                grade: "น่าอยู่อาศัยระดับดี (A)",
+                riskBadge: { text: "เสี่ยงปานกลาง (น้ำรอระบาย)", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดีมาก (85%)", env: "ปานกลาง (72%)", convenience: "ดีเยี่ยม (90%)" },
+                scores: { safety: 85, env: 72, infra: 90, transit: 85, green: 75 },
+                flood: { status: "เฝ้าระวังช่วงฝนตกหนักบนถนนแจ้งวัฒนะ", percent: 60 },
+                pm: { status: "36 µg/m³ (ปานกลาง)", percent: 76 },
+                hospital: "รพ.เวิลด์เมดิคอล / รพ.วิภาราม ปากเกร็ด",
+                police: "สภ.ปากเกร็ด (1.5 กม.)",
+                transit: "รถไฟฟ้าสายสีชมพู / ทางด่วนศรีรัช",
+                traffic: { status: "หนาแน่นช่วงเช้า-เย็นบนถนนแจ้งวัฒนะ", percent: 50 },
+                park: "สวนสมเด็จพระศรีนครินทร์ นนทบุรี",
+                noise: "ปานกลาง ~ 62 dB",
+                alerts: [
+                    { icon: "train", color: "text-sky-600 dark:text-sky-400", title: "เชื่อมต่อรถไฟฟ้าสายสีชมพู", desc: "เดินทางเข้าสู่ศูนย์ราชการและรามอินทราได้สะดวกยิ่งขึ้น" }
+                ],
+                recommendations: [
+                    "เหมาะสำหรับผู้ทำงานย่านศูนย์ราชการแจ้งวัฒนะ หรือเมืองทองธานี",
+                    "เผื่อเวลาเดินทางในช่วงที่มีงานแสดงสินค้าขนาดใหญ่ที่อิมแพ็ค"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.เวิลด์เมดิคอล", top: "40%", left: "50%" },
+                    { type: "safety", label: "สภ.ปากเกร็ด", top: "30%", left: "25%" },
+                    { type: "risk", label: "จุดเฝ้าระวังน้ำท่วมแจ้งวัฒนะ", top: "65%", left: "60%" }
+                ],
+                votes: {
+                    total: 92,
+                    avg: 4.2,
+                    counts: { 5: 42, 4: 34, 3: 11, 2: 3, 1: 2 },
+                    reviews: [
+                        { user: "ชาวแจ้งวัฒนะ", rating: 4, tags: ["👍 เดินทางสะดวก", "🍜 ของกินหาง่าย"], comment: "มีรถไฟฟ้าสายสีชมพูแล้วสะดวกขึ้นเยอะ ห้างและโรงพยาบาลใกล้มาก", time: "1 วันที่แล้ว" }
+                    ]
+                }
+            },
+            chiangmai: {
+                title: "ต.สุเทพ (นิมมานเหมินท์), อ.เมืองเชียงใหม่",
+                subtitle: "จ.เชียงใหม่ (ภาคเหนือ) • พิกัด: 18.7968, 98.9675",
+                overall: 81,
+                grade: "น่าอยู่อาศัยระดับดี (A)",
+                riskBadge: { text: "เฝ้าระวังฝุ่นตามฤดูกาล", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดีเยี่ยม (90%)", env: "เฝ้าระวัง PM2.5 (58%)", convenience: "ดีเยี่ยม (92%)" },
+                scores: { safety: 90, env: 58, infra: 92, transit: 78, green: 86 },
+                flood: { status: "ต่ำ (ระบายน้ำลงคลองแม่ข่าได้ดี)", percent: 85 },
+                pm: { status: "สูงช่วง ก.พ.-เม.ย. / ดีช่วงฤดูฝน", percent: 50 },
+                hospital: "รพ.มหาราชนครเชียงใหม่ (สวนดอก 1.5 กม.)",
+                police: "สภ.ภูพิงคราชนิเวศน์ (1.2 กม.)",
+                transit: "รถแดงสี่ล้อ / รถเมล์ RTC Smart Bus",
+                traffic: { status: "หนาแน่นช่วงเย็นและฤดูท่องเที่ยว", percent: 60 },
+                park: "อ่างแก้ว มช. (1.8 กม.) / สวนสุขภาพ",
+                noise: "คึกคักโซนร้านค้า ~ 64 dB",
+                alerts: [
+                    { icon: "wind", color: "text-amber-500 dark:text-amber-400", title: "เฝ้าระวังหมอกควันและฝุ่น PM2.5", desc: "ช่วงเดือนกุมภาพันธ์ - เมษายน ค่าฝุ่นอาจสูงเกินมาตรฐาน ควรเตรียมเครื่องฟอกอากาศ" },
+                    { icon: "heart-pulse", color: "text-emerald-600 dark:text-emerald-400", title: "ใกล้ศูนย์การแพทย์ระดับภูมิภาค", desc: "อยู่ใกล้ รพ.สวนดอก และคลินิกเฉพาะทางครบครัน" }
+                ],
+                recommendations: [
+                    "ติดตั้งเครื่องฟอกอากาศและหน้ากาก N95 สำหรับช่วงฤดูฝุ่นควันภาคเหนือ",
+                    "เหมาะสำหรับ Digital Nomad นักศึกษา และครอบครัวที่ชอบบรรยากาศเมืองผสมธรรมชาติ",
+                    "สามารถวิ่งออกกำลังกายยามเย็นที่อ่างแก้ว มช. ได้อย่างปลอดภัย"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.มหาราชนครเชียงใหม่", top: "55%", left: "40%" },
+                    { type: "safety", label: "สภ.ภูพิงคราชนิเวศน์", top: "30%", left: "25%" },
+                    { type: "risk", label: "จุดตรวจวัดคุณภาพอากาศ PM2.5", top: "40%", left: "70%" }
+                ],
+                votes: {
+                    total: 165,
+                    avg: 4.5,
+                    counts: { 5: 98, 4: 45, 3: 15, 2: 5, 1: 2 },
+                    reviews: [
+                        { user: "นักศึกษา มช.", rating: 5, tags: ["🍜 ของกินหาง่าย", "🛡️ ปลอดภัย ไฟสว่าง", "🌫️ ฝุ่นควัน/มลพิษ"], comment: "น่าอยู่มาก คาเฟ่เยอะ ใกล้ รพ. แต่ช่วงมีนา-เมษา ฝุ่นหนักจริงๆ", time: "1 วันที่แล้ว" }
+                    ]
+                }
+            },
+            chiangrai: {
+                title: "ต.เวียง, อ.เมืองเชียงราย",
+                subtitle: "จ.เชียงราย (ภาคเหนือ) • พิกัด: 19.9072, 99.8310",
+                overall: 79,
+                grade: "น่าอยู่อาศัยระดับดี (B+)",
+                riskBadge: { text: "เฝ้าระวังน้ำหลาก/แผ่นดินไหว", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดีมาก (88%)", env: "ปานกลาง (62%)", convenience: "ดี (82%)" },
+                scores: { safety: 88, env: 62, infra: 82, transit: 74, green: 89 },
+                flood: { status: "เฝ้าระวังพื้นที่ริมแม่น้ำกก", percent: 60 },
+                pm: { status: "เฝ้าระวังหมอกควันข้ามแดน", percent: 55 },
+                hospital: "รพ.เชียงรายประชานุเคราะห์ (1.5 กม.)",
+                police: "สภ.เมืองเชียงราย (900 ม.)",
+                transit: "รถเมล์ไฟฟ้า / สองแถว / รถส่วนตัว",
+                traffic: { status: "คล่องตัว ยกเว้นหน้าโรงเรียน", percent: 82 },
+                park: "สวนตุงและโคม / สวนสาธารณะเกาะลอย",
+                noise: "เงียบสงบ ~ 50 dB",
+                alerts: [
+                    { icon: "activity", color: "text-amber-500 dark:text-amber-400", title: "พื้นที่ใกล้แนวรอยเลื่อนแผ่นดินไหว", desc: "ควรตรวจสอบมาตรฐานโครงสร้างอาคารต้านทานแผ่นดินไหวและติดตามประกาศกรมอุตุฯ" },
+                    { icon: "cloud-rain", color: "text-sky-600 dark:text-sky-400", title: "เฝ้าระวังน้ำล้นตลิ่งแม่น้ำกก", desc: "ในฤดูมรสุมที่ฝนตกหนักต่อเนื่อง พื้นที่ลุ่มต่ำริมน้ำควรติดตามระดับน้ำใกล้ชิด" }
+                ],
+                recommendations: [
+                    "ค่าครองชีพไม่สูง อากาศเย็นสบายช่วงปลายปี ผู้คนเป็นมิตรและปลอดภัยสูง",
+                    "เลือกที่พักอาศัยที่ไม่อยู่ในพื้นที่ลุ่มต่ำติดริมตลิ่งแม่น้ำกก"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.เชียงรายประชานุเคราะห์", top: "45%", left: "55%" },
+                    { type: "safety", label: "สภ.เมืองเชียงราย", top: "30%", left: "35%" },
+                    { type: "risk", label: "จุดเฝ้าระวังระดับน้ำแม่น้ำกก", top: "20%", left: "65%" }
+                ],
+                votes: {
+                    total: 74,
+                    avg: 4.3,
+                    counts: { 5: 38, 4: 24, 3: 8, 2: 3, 1: 1 },
+                    reviews: [
+                        { user: "คนเจียงฮาย", rating: 5, tags: ["🛡️ ปลอดภัย ไฟสว่าง", "👍 เดินทางสะดวก"], comment: "เมืองสงบ ไม่วุ่นวาย ค่าครองชีพดีมาก", time: "4 วันที่แล้ว" }
+                    ]
+                }
+            },
+            korat: {
+                title: "ต.ในเมือง, อ.เมืองนครราชสีมา",
+                subtitle: "จ.นครราชสีมา (ภาคอีสาน) • พิกัด: 14.9799, 102.0978",
+                overall: 83,
+                grade: "น่าอยู่อาศัยระดับดีมาก (A)",
+                riskBadge: { text: "เสี่ยงต่ำ", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+                quick: { safety: "ดีมาก (86%)", env: "ดี (78%)", convenience: "ดีเยี่ยม (90%)" },
+                scores: { safety: 86, env: 78, infra: 90, transit: 80, green: 81 },
+                flood: { status: "ปานกลาง (จุดลุ่มต่ำรอบคูเมือง)", percent: 70 },
+                pm: { status: "35 µg/m³ (ปานกลาง)", percent: 78 },
+                hospital: "รพ.มหาราชนครราชสีมา (2.0 กม.)",
+                police: "สภ.เมืองนครราชสีมา (1.0 กม.)",
+                transit: "รถสองแถวรอบเมือง / บขส.โคราช / รถไฟ",
+                traffic: { status: "หนาแน่นช่วงเย็นหน้าห้างและโรงเรียน", percent: 65 },
+                park: "สวนน้ำบุ่งตาหลั่ว (2.5 กม.)",
+                noise: "ปานกลาง ~ 58 dB",
+                alerts: [
+                    { icon: "check-circle", color: "text-emerald-600 dark:text-emerald-400", title: "ศูนย์กลางสาธารณูปโภคภาคอีสาน", desc: "ครบครันด้วยโรงพยาบาลขนาดใหญ่ มหาวิทยาลัย และห้างสรรพสินค้าชั้นนำ" },
+                    { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "น้ำท่วมขังรอระบายบางจุด", desc: "บริเวณถนนมิตรภาพและจุดลุ่มต่ำในเขตเทศบาลอาจมีน้ำขังชั่วคราวเมื่อฝนตกหนัก" }
+                ],
+                recommendations: [
+                    "สวนน้ำบุ่งตาหลั่วเป็นแหล่งออกกำลังกายและพักผ่อนชั้นเยี่ยมของคนในพื้นที่",
+                    "การเดินทางด้วยรถยนต์ส่วนตัวหรือรถจักรยานยนต์สะดวกที่สุด"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.มหาราชนครราชสีมา", top: "30%", left: "60%" },
+                    { type: "safety", label: "สภ.เมืองนครราชสีมา", top: "50%", left: "40%" },
+                    { type: "risk", label: "จุดเฝ้าระวังน้ำขังแยกพีกาซัส", top: "70%", left: "30%" }
+                ],
+                votes: {
+                    total: 121,
+                    avg: 4.4,
+                    counts: { 5: 65, 4: 40, 3: 11, 2: 3, 1: 2 },
+                    reviews: [
+                        { user: "ลูกหลานย่าโม", rating: 5, tags: ["🍜 ของกินหาง่าย", "🛡️ ปลอดภัย ไฟสว่าง"], comment: "เมืองใหญ่สิ่งอำนวยความสะดวกครบเหมือนกรุงเทพฯ แต่รถไม่ติดเท่า", time: "6 ชั่วโมงที่แล้ว" }
+                    ]
+                }
+            },
+            khonkaen: {
+                title: "ต.ในเมือง (โซนกังสดาล - มข.), อ.เมืองขอนแก่น",
+                subtitle: "จ.ขอนแก่น (ภาคอีสาน) • พิกัด: 16.4419, 102.8359",
+                overall: 85,
+                grade: "น่าอยู่อาศัยระดับดีมาก (A)",
+                riskBadge: { text: "เสี่ยงต่ำ", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+                quick: { safety: "ดีมาก (88%)", env: "ดี (80%)", convenience: "ดีเยี่ยม (92%)" },
+                scores: { safety: 88, env: 80, infra: 92, transit: 82, green: 84 },
+                flood: { status: "ต่ำ-ปานกลาง", percent: 78 },
+                pm: { status: "34 µg/m³ (ปานกลาง)", percent: 80 },
+                hospital: "รพ.ศรีนครินทร์ (1.2 กม.)",
+                police: "สภ.ย่อยมหาวิทยาลัยขอนแก่น (1.5 กม.)",
+                transit: "Khon Kaen City Bus / สองแถว",
+                traffic: { status: "คล่องตัว ยกเว้นช่วงเลิกเรียน", percent: 75 },
+                park: "บึงสีฐาน มข. / บึงแก่นนคร",
+                noise: "คึกคักโซนหอพัก ~ 60 dB",
+                alerts: [
+                    { icon: "shield-check", color: "text-emerald-600 dark:text-emerald-400", title: "เมืองอัจฉริยะ (Smart City) และศูนย์การแพทย์", desc: "มีกล้องวงจรปิดและระบบขนส่งสาธารณะเชื่อมต่อทั่วเมือง ใกล้ รพ.ศรีนครินทร์" }
+                ],
+                recommendations: [
+                    "เหมาะสำหรับบุคลากรทางการแพทย์ นักศึกษา และครอบครัวรุ่นใหม่",
+                    "มีพื้นที่ออกกำลังกายรอบบึงสีฐานและบึงแก่นนครที่ปลอดภัยและบรรยากาศดี"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.ศรีนครินทร์", top: "35%", left: "45%" },
+                    { type: "safety", label: "สภ.ย่อย มข.", top: "25%", left: "30%" }
+                ],
+                votes: {
+                    total: 98,
+                    avg: 4.6,
+                    counts: { 5: 62, 4: 28, 3: 6, 2: 1, 1: 1 },
+                    reviews: [
+                        { user: "ชาวกังสดาล", rating: 5, tags: ["🍜 ของกินหาง่าย", "👍 เดินทางสะดวก"], comment: "ของกินเยอะมาก ใกล้ รพ.ศรีนครินทร์ อุ่นใจเรื่องสุขภาพ", time: "1 วันที่แล้ว" }
+                    ]
+                }
+            },
+            udon: {
+                title: "ต.หมากแข้ง, อ.เมืองอุดรธานี",
+                subtitle: "จ.อุดรธานี (ภาคอีสาน) • พิกัด: 17.4138, 102.7872",
+                overall: 82,
+                grade: "น่าอยู่อาศัยระดับดีมาก (A)",
+                riskBadge: { text: "เสี่ยงต่ำ", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+                quick: { safety: "ดีมาก (86%)", env: "ดี (80%)", convenience: "ดีเยี่ยม (89%)" },
+                scores: { safety: 86, env: 80, infra: 89, transit: 80, green: 85 },
+                flood: { status: "ต่ำ-ปานกลาง", percent: 76 },
+                pm: { status: "32 µg/m³ (ดี)", percent: 82 },
+                hospital: "รพ.อุดรธานี / รพ.กรุงเทพอุดร",
+                police: "สภ.เมืองอุดรธานี (1.0 กม.)",
+                transit: "รถสองแถว / สนามบินนานาชาติอุดรธานี",
+                traffic: { status: "คล่องตัว", percent: 78 },
+                park: "สวนสาธารณะหนองประจักษ์ศิลปาคม",
+                noise: "เงียบสงบ ~ 55 dB",
+                alerts: [
+                    { icon: "sparkles", color: "text-emerald-600 dark:text-emerald-400", title: "เมืองน่าอยู่และศูนย์กลางเศรษฐกิจอีสานตอนบน", desc: "เดินทางสะดวก มีสวนสาธารณะหนองประจักษ์ขนาดใหญ่ใจกลางเมือง" }
+                ],
+                recommendations: [
+                    "เหมาะสำหรับครอบครัวและการอยู่อาศัยระยะยาว ค่าครองชีพสมเหตุสมผล",
+                    "รอบหนองประจักษ์เป็นจุดออกกำลังกายและพักผ่อนที่ปลอดภัยมาก"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.อุดรธานี", top: "40%", left: "40%" },
+                    { type: "safety", label: "สภ.เมืองอุดรธานี", top: "55%", left: "60%" }
+                ],
+                votes: {
+                    total: 84,
+                    avg: 4.5,
+                    counts: { 5: 48, 4: 28, 3: 6, 2: 1, 1: 1 },
+                    reviews: [
+                        { user: "คนอุดร", rating: 5, tags: ["🛡️ ปลอดภัย ไฟสว่าง", "👍 เดินทางสะดวก"], comment: "เมืองสะอาด น่าอยู่ หนองประจักษ์บรรยากาศดีมากตอนเย็น", time: "2 วันที่แล้ว" }
+                    ]
+                }
+            },
+            pattaya: {
+                title: "เมืองพัทยา, อ.บางละมุง",
+                subtitle: "จ.ชลบุรี (ภาคตะวันออก) • พิกัด: 12.9236, 100.8825",
+                overall: 77,
+                grade: "น่าอยู่อาศัยระดับดี (B+)",
+                riskBadge: { text: "เฝ้าระวังน้ำท่วม/จราจร", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ปานกลาง-ดี (79%)", env: "ดี (82%)", convenience: "ดีเยี่ยม (93%)" },
+                scores: { safety: 79, env: 82, infra: 93, transit: 80, green: 72 },
+                flood: { status: "เฝ้าระวังน้ำท่วมฉับพลันเมื่อฝนหนัก", percent: 55 },
+                pm: { status: "24 µg/m³ (อากาศดี ลมทะเลพัดผ่าน)", percent: 90 },
+                hospital: "รพ.กรุงเทพพัทยา (2.0 กม.)",
+                police: "สภ.เมืองพัทยา (1.0 กม.)",
+                transit: "รถสองแถวพัทยา / มอเตอร์เวย์สาย 7",
+                traffic: { status: "หนาแน่นช่วงวันหยุดสุดสัปดาห์", percent: 55 },
+                park: "สวนสาธารณะเฉลิมพระเกียรติ (เขาพระตำหนัก)",
+                noise: "คึกคักโซนท่องเที่ยว ~ 68 dB",
+                alerts: [
+                    { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "น้ำท่วมขังซอยบัวขาว / พัทยาใต้เมื่อฝนตกหนัก", desc: "น้ำระบายลงทะเลไม่ทันในช่วงน้ำทะเลหนุน ควรหลีกเลี่ยงเส้นทางลุ่มต่ำ" },
+                    { icon: "wind", color: "text-emerald-600 dark:text-emerald-400", title: "คุณภาพอากาศดีตลอดปี", desc: "มีลมทะเลถ่ายเทตลอดเวลา ค่าฝุ่น PM2.5 ต่ำกว่าเกณฑ์มาตรฐาน" }
+                ],
+                recommendations: [
+                    "หากต้องการความเงียบสงบ แนะนำโซนพระตำหนัก หาดจอมเทียน หรือฝั่งพัทยาตะวันออก",
+                    "มีโรงพยาบาลมาตรฐานสากลและสิ่งอำนวยความสะดวกครบครัน"
+                ],
+                pins: [
+                    { type: "safety", label: "สภ.เมืองพัทยา", top: "45%", left: "35%" },
+                    { type: "health", label: "รพ.กรุงเทพพัทยา", top: "25%", left: "60%" },
+                    { type: "risk", label: "จุดเฝ้าระวังน้ำท่วมถนนสุขุมวิท-พัทยาใต้", top: "68%", left: "55%" }
+                ],
+                votes: {
+                    total: 109,
+                    avg: 4.1,
+                    counts: { 5: 48, 4: 35, 3: 18, 2: 5, 1: 3 },
+                    reviews: [
+                        { user: "คนอยู่จอมเทียน", rating: 4, tags: ["👍 เดินทางสะดวก", "🌊 ฝนตกน้ำรอระบาย"], comment: "อากาศดี ใกล้กรุงเทพฯ ขับรถชั่วโมงกว่าๆ แต่ฝนตกหนักทีไรน้ำท่วมถนนสุขุมวิททุกที", time: "2 วันที่แล้ว" }
+                    ]
+                }
+            },
+            rayong: {
+                title: "ต.ท่าประดู่ - มาบตาพุด, อ.เมืองระยอง",
+                subtitle: "จ.ระยอง (ภาคตะวันออก) • พิกัด: 12.6814, 101.2816",
+                overall: 75,
+                grade: "น่าอยู่อาศัยระดับปานกลาง (B+)",
+                riskBadge: { text: "เฝ้าระวังสิ่งแวดล้อมอุตสาหกรรม", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดี (82%)", env: "ปานกลาง (65%)", convenience: "ดี (84%)" },
+                scores: { safety: 82, env: 65, infra: 84, transit: 75, green: 76 },
+                flood: { status: "ปานกลาง", percent: 72 },
+                pm: { status: "เฝ้าระวังคุณภาพอากาศใกล้เขตอุตสาหกรรม", percent: 62 },
+                hospital: "รพ.ระยอง / รพ.กรุงเทพระยอง",
+                police: "สภ.เมืองระยอง (1.2 กม.)",
+                transit: "รถสองแถว / รถรับส่งพนักงาน / รถส่วนตัว",
+                traffic: { status: "หนาแน่นช่วงเข้า-เลิกกะงาน", percent: 65 },
+                park: "สวนศรีเมือง / ชายหาดแสงจันทร์",
+                noise: "ปานกลาง ~ 58 dB",
+                alerts: [
+                    { icon: "alert-circle", color: "text-amber-500 dark:text-amber-400", title: "ติดตามดรรชนีคุณภาพอากาศ (AQI/VOCs)", desc: "พื้นที่ใกล้เขตนิคมอุตสาหกรรมควรติดตามข้อมูลคุณภาพอากาศจากกรมควบคุมมลพิษ" }
+                ],
+                recommendations: [
+                    "โซนตัวเมืองและเลียบหาดแสงจันทร์มีบรรยากาศผ่อนคลาย เหมาะกับการพักอาศัย",
+                    "เศรษฐกิจดี โอกาสการทำงานสูง ค่าครองชีพสมเหตุสมผล"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.ระยอง", top: "40%", left: "45%" },
+                    { type: "safety", label: "สภ.เมืองระยอง", top: "55%", left: "35%" },
+                    { type: "risk", label: "สถานีตรวจวัดคุณภาพอากาศ", top: "30%", left: "70%" }
+                ],
+                votes: {
+                    total: 67,
+                    avg: 4.0,
+                    counts: { 5: 25, 4: 24, 3: 12, 2: 4, 1: 2 },
+                    reviews: [
+                        { user: "วิศวกรระยอง", rating: 4, tags: ["🍜 ของกินหาง่าย", "🛡️ ปลอดภัย ไฟสว่าง"], comment: "ในเมืองน่าอยู่ ใกล้ทะเล อาหารทะเลสดมาก", time: "5 วันที่แล้ว" }
+                    ]
+                }
+            },
+            phuket: {
+                title: "ต.ตลาดใหญ่, อ.เมืองภูเก็ต",
+                subtitle: "จ.ภูเก็ต (ภาคใต้) • พิกัด: 7.8804, 98.3923",
+                overall: 82,
+                grade: "น่าอยู่อาศัยระดับดีมาก (A)",
+                riskBadge: { text: "เฝ้าระวังฝนตกหนัก/ดินสไลด์เนินเขา", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดีมาก (88%)", env: "ดี (82%)", convenience: "ดีเยี่ยม (90%)" },
+                scores: { safety: 88, env: 82, infra: 90, transit: 72, green: 84 },
+                flood: { status: "ปานกลาง (น้ำรอระบายย่านเมืองเก่าเมื่อฝนหนัก)", percent: 68 },
+                pm: { status: "19 µg/m³ (ดีมาก)", percent: 95 },
+                hospital: "รพ.วชิระภูเก็ต / รพ.กรุงเทพภูเก็ต",
+                police: "สภ.เมืองภูเก็ต (800 ม.)",
+                transit: "รถโพถ้อง / Smart Bus / รถส่วนตัว",
+                traffic: { status: "หนาแน่นช่วงเวลาเร่งด่วน", percent: 55 },
+                park: "สวนสาธารณะสะพานหิน (1.5 กม.)",
+                noise: "ปานกลาง ~ 60 dB",
+                alerts: [
+                    { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "เฝ้าระวังมรสุมและพื้นที่ลาดชัน", desc: "ช่วงเดือน พ.ค.-ต.ค. มีฝนตกชุก พื้นที่เชิงเขาควรระวังดินสไลด์และน้ำป่าไหลหลาก" },
+                    { icon: "sparkles", color: "text-emerald-600 dark:text-emerald-400", title: "อากาศบริสุทธิ์และเมืองวัฒนธรรม", desc: "PM2.5 ต่ำตลอดปี มีระบบสาธารณสุขและโรงเรียนนานาชาติครบครัน" }
+                ],
+                recommendations: [
+                    "ย่านเมืองเก่าภูเก็ตมีความปลอดภัยสูง เดินเล่นได้ทั้งกลางวันและกลางคืน",
+                    "ควรตรวจสอบเส้นทางน้ำไหลหากเลือกที่พักอาศัยบริเวณเชิงเขา"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.วชิระภูเก็ต", top: "30%", left: "40%" },
+                    { type: "safety", label: "สภ.เมืองภูเก็ต", top: "55%", left: "50%" },
+                    { type: "risk", label: "จุดเฝ้าระวังน้ำท่วมขังแยกชาร์เตอร์", top: "65%", left: "35%" }
+                ],
+                votes: {
+                    total: 118,
+                    avg: 4.5,
+                    counts: { 5: 72, 4: 32, 3: 10, 2: 3, 1: 1 },
+                    reviews: [
+                        { user: "คนหลาดใหญ่", rating: 5, tags: ["🛡️ ปลอดภัย ไฟสว่าง", "🍜 ของกินหาง่าย"], comment: "อากาศดีมาก ไม่มีฝุ่น PM2.5 เลย เมืองสวย ปลอดภัย", time: "1 วันที่แล้ว" }
+                    ]
+                }
+            },
+            hatyai: {
+                title: "ต.หาดใหญ่, อ.หาดใหญ่",
+                subtitle: "จ.สงขลา (ภาคใต้) • พิกัด: 7.0086, 100.4747",
+                overall: 80,
+                grade: "น่าอยู่อาศัยระดับดี (A)",
+                riskBadge: { text: "เฝ้าระวังน้ำท่วมช่วงมรสุม", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: "ดี (84%)", env: "ดี (78%)", convenience: "ดีเยี่ยม (91%)" },
+                scores: { safety: 84, env: 78, infra: 91, transit: 82, green: 80 },
+                flood: { status: "เฝ้าระวังช่วง พ.ย.-ธ.ค. (มีคลอง ร.1 ช่วยระบาย)", percent: 65 },
+                pm: { status: "22 µg/m³ (ดีมาก)", percent: 92 },
+                hospital: "รพ.สงขลานครินทร์ (ม.อ. 2.5 กม.) / รพ.หาดใหญ่",
+                police: "สภ.หาดใหญ่ (1.0 กม.)",
+                transit: "รถตุ๊กตุ๊ก / สองแถว / สถานีรถไฟหาดใหญ่",
+                traffic: { status: "หนาแน่นใจกลางเมืองและตลาดกิมหยง", percent: 62 },
+                park: "สวนสาธารณะเทศบาลนครหาดใหญ่",
+                noise: "คึกคักย่านการค้า ~ 62 dB",
+                alerts: [
+                    { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "ติดตามระดับน้ำช่วงมรสุมภาคใต้", desc: "ช่วงปลายปี (พ.ย.-ม.ค.) ควรติดตามประกาศเตือนภัยฝนตกหนักจากเทศบาลนครหาดใหญ่" },
+                    { icon: "heart-pulse", color: "text-emerald-600 dark:text-emerald-400", title: "ศูนย์กลางการแพทย์และเศรษฐกิจภาคใต้", desc: "ใกล้ รพ.สงขลานครินทร์ (ม.อ.) และระบบกล้อง CCTV ครอบคลุมทั่วเขตเทศบาล" }
+                ],
+                recommendations: [
+                    "โซนใกล้ ม.อ. (คอหงส์) บรรยากาศดี ปลอดภัยสูง และมีสิ่งอำนวยความสะดวกครบ",
+                    "อากาศดีตลอดปี อาหารการกินอุดมสมบูรณ์และราคาไม่แพง"
+                ],
+                pins: [
+                    { type: "health", label: "รพ.สงขลานครินทร์ (ม.อ.)", top: "35%", left: "65%" },
+                    { type: "safety", label: "สภ.หาดใหญ่", top: "50%", left: "35%" },
+                    { type: "risk", label: "จุดเฝ้าระวังระดับน้ำคลองอู่ตะเภา", top: "70%", left: "25%" }
+                ],
+                votes: {
+                    total: 104,
+                    avg: 4.4,
+                    counts: { 5: 58, 4: 32, 3: 10, 2: 2, 1: 2 },
+                    reviews: [
+                        { user: "เด็ก ม.อ. หาดใหญ่", rating: 5, tags: ["🍜 ของกินหาง่าย", "🛡️ ปลอดภัย ไฟสว่าง"], comment: "ของกินอร่อยมาก อากาศดี ใกล้ รพ.ใหญ่ เดินทางสะดวก", time: "3 วันที่แล้ว" }
+                    ]
+                }
+            }
+        };
+
+        let activeFilter = 'all';
+
+        // Initialize Lucide icons on page load
+        window.onload = function() {
+            lucide.createIcons();
+            loadLocationData('sukhumvit'); // Load default location
+        };
+
+        // Text Search Handler for any location in Thailand
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showToast('กรุณากรอกชื่อสถานที่หรืออำเภอ/จังหวัดที่ต้องการค้นหา');
+                return;
+            }
+
+            // Check if matches any preset keys
+            const lowerQ = query.toLowerCase();
+            let matchedKey = Object.keys(locationData).find(k => k.toLowerCase() === lowerQ || locationData[k].title.toLowerCase().includes(lowerQ));
+
+            if (matchedKey) {
+                loadLocationData(matchedKey);
+                showToast(`พบข้อมูลพื้นที่: ${locationData[matchedKey].title}`);
+            } else {
+                // Generate a dynamic profile for any typed location in Thailand
+                const dynamicKey = `search_${query}`;
+                if (!locationData[dynamicKey]) {
+                    locationData[dynamicKey] = generateThailandAreaProfile(query, "ประเทศไทย", 13.7563, 100.5018);
+                }
+                loadLocationData(dynamicKey);
+                showToast(`ประเมินผลพื้นที่: ${query}`);
+            }
+        }
+
+        // Dropdown Selection Handler
+        function selectLocationByDropdown() {
+            const val = document.getElementById('provinceSelect').value;
+            if (val && locationData[val]) {
+                loadLocationData(val);
+            }
+        }
+
+        // Render Location Data into Dashboard UI
+        function loadLocationData(key) {
+            const data = locationData[key];
+            if (!data) return;
+
+            currentLocKey = key;
+
+            // Sync dropdown if applicable
+            const dropdown = document.getElementById('provinceSelect');
+            if (dropdown) dropdown.value = key;
+
+            // Set Title & Header
+            document.getElementById('locTitle').innerText = data.title;
+            document.getElementById('locSub').innerText = data.subtitle;
+            document.getElementById('overallScore').innerText = data.overall;
+            document.getElementById('livabilityGrade').innerText = data.grade;
+            document.getElementById('voteAreaName').innerText = data.title;
+
+            // Risk Badge
+            const riskBadge = document.getElementById('riskBadge');
+            riskBadge.innerText = data.riskBadge.text;
+            riskBadge.className = `px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${data.riskBadge.class}`;
+
+            // Quick Stats
+            document.getElementById('quickSafety').innerText = data.quick.safety;
+            document.getElementById('quickEnv').innerText = data.quick.env;
+            document.getElementById('quickConvenience').innerText = data.quick.convenience;
+
+            // Scores
+            document.getElementById('scoreSafety').innerText = `${data.scores.safety}/100`;
+            document.getElementById('scoreEnv').innerText = `${data.scores.env}/100`;
+            document.getElementById('scoreInfra').innerText = `${data.scores.infra}/100`;
+            document.getElementById('scoreTransit').innerText = `${data.scores.transit}/100`;
+            document.getElementById('scoreGreen').innerText = `${data.scores.green}/100`;
+
+            // Environment & Infrastructure details
+            document.getElementById('floodStatus').innerText = data.flood.status;
+            document.getElementById('floodBar').style.width = `${data.flood.percent}%`;
+            document.getElementById('pmStatus').innerText = data.pm.status;
+            document.getElementById('pmBar').style.width = `${data.pm.percent}%`;
+
+            document.getElementById('hospitalDist').innerText = data.hospital;
+            document.getElementById('policeDist').innerText = data.police;
+            document.getElementById('transitAccess').innerText = data.transit;
+            document.getElementById('trafficStatus').innerText = data.traffic.status;
+            document.getElementById('trafficBar').style.width = `${data.traffic.percent}%`;
+
+            document.getElementById('parkDist').innerText = data.park;
+            document.getElementById('noiseStatus').innerText = data.noise;
+
+            // Render Alert Box List
+            const alertContainer = document.getElementById('alertBoxList');
+            alertContainer.innerHTML = '';
+            data.alerts.forEach(alert => {
+                const item = document.createElement('div');
+                item.className = 'flex items-start space-x-3 p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/40 text-xs sm:text-sm';
+                item.innerHTML = `
+                    <div class="mt-0.5">
+                        <i data-lucide="${alert.icon}" class="w-4 h-4 ${alert.color}"></i>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-slate-900 dark:text-white">${alert.title}:</span>
+                        <span class="text-slate-600 dark:text-slate-300 ml-1">${alert.desc}</span>
+                    </div>
+                `;
+                alertContainer.appendChild(item);
+            });
+
+            // Render Recommendations
+            const recContainer = document.getElementById('recommendationList');
+            recContainer.innerHTML = '';
+            data.recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-2 bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700/30';
+                li.innerHTML = `
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 flex-shrink-0"></i>
+                    <span>${rec}</span>
+                `;
+                recContainer.appendChild(li);
+            });
+
+            // Render Map Pins
+            renderMapPins(data.pins);
+
+            // Render Community Votes & Reviews
+            renderCommunitySection(data.votes);
+
+            // Refresh Lucide Icons for dynamic content
+            lucide.createIcons();
+            showToast(`โหลดข้อมูลพื้นที่: ${data.title}`);
+        }
+
+        // --- Community Voting System Functions ---
+        function setRating(val) {
+            selectedUserRating = val;
+            const labels = ["", "1 ดาว - ควรปรับปรุงมาก", "2 ดาว - พอใช้", "3 ดาว - ปานกลาง", "4 ดาว - น่าอยู่ ปลอดภัย", "5 ดาว - ดีเยี่ยม น่าอยู่มาก"];
+            document.getElementById('selectedRatingText').innerText = labels[val];
+
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(btn => {
+                const starVal = parseInt(btn.getAttribute('data-val'));
+                const svg = btn.querySelector('svg');
+                if (starVal <= val) {
+                    btn.classList.add('text-amber-500', 'dark:text-amber-400', 'bg-amber-50', 'dark:bg-amber-500/10', 'border-amber-400', 'dark:border-amber-500/30');
+                    btn.classList.remove('text-slate-400', 'bg-white', 'dark:bg-slate-800', 'border-slate-200', 'dark:border-slate-700');
+                    if (svg) svg.classList.add('fill-amber-500', 'dark:fill-amber-400');
+                } else {
+                    btn.classList.remove('text-amber-500', 'dark:text-amber-400', 'bg-amber-50', 'dark:bg-amber-500/10', 'border-amber-400', 'dark:border-amber-500/30');
+                    btn.classList.add('text-slate-400', 'bg-white', 'dark:bg-slate-800', 'border-slate-200', 'dark:border-slate-700');
+                    if (svg) svg.classList.remove('fill-amber-500', 'dark:fill-amber-400');
+                }
+            });
+        }
+
+        function toggleVoteTag(btn) {
+            btn.classList.toggle('bg-sky-500/15');
+            btn.classList.toggle('dark:bg-sky-600/30');
+            btn.classList.toggle('border-sky-500');
+            btn.classList.toggle('dark:border-sky-400');
+            btn.classList.toggle('text-sky-700');
+            btn.classList.toggle('dark:text-white');
+            btn.classList.toggle('selected-tag');
+        }
+
+        function submitCommunityVote() {
+            if (selectedUserRating === 0) {
+                showToast('กรุณาเลือกจำนวนดาวเพื่อให้คะแนนก่อนส่งโหวตครับ');
+                return;
+            }
+
+            const commentText = document.getElementById('voteCommentInput').value.trim();
+            const selectedTagEls = document.querySelectorAll('.selected-tag');
+            const tags = Array.from(selectedTagEls).map(el => el.innerText);
+
+            if (!locationData[currentLocKey].votes) {
+                locationData[currentLocKey].votes = { total: 0, avg: 5.0, counts: { 5:0, 4:0, 3:0, 2:0, 1:0 }, reviews: [] };
+            }
+
+            const v = locationData[currentLocKey].votes;
+            v.total += 1;
+            v.counts[selectedUserRating] = (v.counts[selectedUserRating] || 0) + 1;
+            
+            let totalScoreSum = 0;
+            for (let s = 1; s <= 5; s++) {
+                totalScoreSum += s * (v.counts[s] || 0);
+            }
+            v.avg = (totalScoreSum / v.total).toFixed(1);
+
+            if (commentText || tags.length > 0) {
+                v.reviews.unshift({
+                    user: "คุณ (ผู้ใช้งานปัจจุบัน)",
+                    rating: selectedUserRating,
+                    tags: tags,
+                    comment: commentText || "ให้คะแนนพื้นที่เรียบร้อยแล้ว",
+                    time: "เมื่อสักครู่"
+                });
+            }
+
+            renderCommunitySection(v);
+            showToast('บันทึกคะแนนเสียงและรีวิวพื้นที่ของคุณเรียบร้อยแล้ว ขอบคุณครับ!');
+            
+            // Reset form
+            selectedUserRating = 0;
+            setRating(0);
+            document.getElementById('voteCommentInput').value = '';
+            selectedTagEls.forEach(el => {
+                el.classList.remove('bg-sky-500/15', 'dark:bg-sky-600/30', 'border-sky-500', 'dark:border-sky-400', 'text-sky-700', 'dark:text-white', 'selected-tag');
+            });
+        }
+
+        function renderCommunitySection(votes) {
+            document.getElementById('totalVotesCount').innerText = votes.total;
+            document.getElementById('communityAvgRating').innerText = votes.avg;
+
+            // Render Breakdown bars
+            const barsContainer = document.getElementById('voteDistributionBars');
+            barsContainer.innerHTML = '';
+            for (let star = 5; star >= 1; star--) {
+                const count = votes.counts[star] || 0;
+                const pct = votes.total > 0 ? Math.round((count / votes.total) * 100) : 0;
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2';
+                row.innerHTML = `
+                    <span class="w-8 text-slate-500 dark:text-slate-400 font-medium">${star} ดาว</span>
+                    <div class="flex-1 bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                        <div class="bg-amber-500 dark:bg-amber-400 h-full rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                    <span class="w-8 text-right text-slate-400">${count}</span>
+                `;
+                barsContainer.appendChild(row);
+            }
+
+            // Render Reviews list
+            const revContainer = document.getElementById('communityReviewsList');
+            revContainer.innerHTML = '';
+            if (!votes.reviews || votes.reviews.length === 0) {
+                revContainer.innerHTML = `<p class="text-xs text-slate-400 italic">ยังไม่มีความคิดเห็นในพื้นที่นี้ เป็นคนแรกที่รีวิวเลย!</p>`;
+                return;
+            }
+
+            votes.reviews.forEach(rev => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs space-y-1.5 shadow-sm';
+                
+                let tagsHtml = '';
+                if (rev.tags && rev.tags.length > 0) {
+                    tagsHtml = `<div class="flex flex-wrap gap-1 mt-1">` + rev.tags.map(t => `<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md text-[10px]">${t}</span>`).join('') + `</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-900 dark:text-white">${rev.user}</span>
+                        <div class="flex items-center gap-1 text-amber-500">
+                            <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-500"></i>
+                            <span class="font-bold text-slate-700 dark:text-slate-200">${rev.rating}</span>
+                            <span class="text-[10px] text-slate-400 ml-1">• ${rev.time}</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-300">${rev.comment}</p>
+                    ${tagsHtml}
+                `;
+                revContainer.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // Render Map Pins based on active filter
+        function renderMapPins(pins) {
+            const container = document.getElementById('mapPinsContainer');
+            container.innerHTML = '';
+
+            pins.forEach(pin => {
+                if (activeFilter !== 'all' && pin.type !== activeFilter) return;
+
+                let colorClass = 'bg-emerald-500 border-emerald-200 text-emerald-900';
+                let iconName = 'shield';
+                if (pin.type === 'health') {
+                    colorClass = 'bg-rose-500 border-rose-200 text-rose-900';
+                    iconName = 'hospital';
+                } else if (pin.type === 'risk') {
+                    colorClass = 'bg-amber-500 border-amber-200 text-amber-900';
+                    iconName = 'alert-triangle';
+                }
+
+                const el = document.createElement('div');
+                el.className = 'absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group';
+                el.style.top = pin.top;
+                el.style.left = pin.left;
+                el.innerHTML = `
+                    <div class="p-2 rounded-full shadow-lg ${colorClass} text-white flex items-center justify-center transition transform group-hover:scale-125">
+                        <i data-lucide="${iconName}" class="w-3.5 h-3.5"></i>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block whitespace-nowrap px-2 py-1 bg-slate-900/90 text-white text-[10px] rounded shadow-md z-30">
+                        ${pin.label}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleMapFilter(type) {
+            activeFilter = type;
+            ['all', 'safety', 'health', 'risk'].forEach(t => {
+                const btn = document.getElementById(`btnFilter${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (btn) {
+                    if (t === type) {
+                        btn.className = 'px-3 py-1.5 rounded-lg bg-sky-600 text-white font-medium shadow';
+                    } else {
+                        btn.className = 'px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-medium transition';
+                    }
+                }
+            });
+            if (locationData[currentLocKey]) {
+                renderMapPins(locationData[currentLocKey].pins);
+            }
+        }
+
+        // Dynamic Area Risk & Livability Analyzer for any coordinate in Thailand
+        function generateThailandAreaProfile(title, province, lat, lng) {
+            let hash = 0;
+            const seedStr = `${title}_${lat.toFixed(2)}_${lng.toFixed(2)}`;
+            for (let i = 0; i < seedStr.length; i++) {
+                hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+                hash |= 0;
+            }
+            const rand = (min, max, offset = 0) => {
+                const x = Math.abs(Math.sin(hash + offset) * 10000);
+                return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min;
+            };
+
+            let region = "ภาคกลาง";
+            let regionalAlert = { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "เฝ้าระวังน้ำฝนรอระบายตามฤดูกาล", desc: "พื้นที่ลุ่มภาคกลางอาจมีน้ำท่วมขังชั่วคราวในช่วงฝนตกหนักต่อเนื่อง" };
+            let pmValue = rand(28, 42, 1);
+            let floodText = "ปานกลาง (ระบายตามระบบเทศบาล/อบต.)";
+            let floodPct = rand(65, 82, 2);
+
+            if (lat > 17.5) {
+                region = "ภาคเหนือ";
+                pmValue = rand(38, 65, 1);
+                regionalAlert = { icon: "wind", color: "text-amber-500 dark:text-amber-400", title: "เฝ้าระวังฝุ่นควันตามฤดูกาลและน้ำป่า", desc: "ช่วง ก.พ.-เม.ย. ควรติดตามค่า PM2.5 และช่วงฤดูฝนควรระวังน้ำหลากในพื้นที่เชิงเขา" };
+                floodText = "ต่ำ-ปานกลาง (เฝ้าระวังพื้นที่ริมลำน้ำ)";
+            } else if (lng > 101.4 && lat > 14.1) {
+                region = "ภาคตะวันออกเฉียงเหนือ (อีสาน)";
+                pmValue = rand(26, 40, 1);
+                regionalAlert = { icon: "sun", color: "text-sky-600 dark:text-sky-400", title: "สภาพภูมิอากาศแปรปรวนตามฤดูกาล", desc: "ฤดูฝนควรติดตามปริมาณน้ำในลำน้ำสาขา ส่วนฤดูแล้งอากาศโปร่งและค่าครองชีพไม่สูง" };
+                floodText = "ต่ำ (ยกเว้นพื้นที่ลุ่มต่ำริมห้วย/แม่น้ำ)";
+                floodPct = rand(72, 88, 2);
+            } else if (lat < 11.5) {
+                region = "ภาคใต้";
+                pmValue = rand(14, 24, 1);
+                regionalAlert = { icon: "cloud-rain", color: "text-amber-500 dark:text-amber-400", title: "เฝ้าระวังมรสุมและฝนตกชุก", desc: "อากาศบริสุทธิ์ตลอดปี แต่ช่วงมรสุม (พ.ค.-ต.ค.) ควรติดตามประกาศเตือนคลื่นลมและน้ำท่วมฉับพลัน" };
+                floodText = "ปานกลาง (เฝ้าระวังช่วงมรสุม)";
+                floodPct = rand(60, 78, 2);
+            } else if (lng > 100.8 && lat >= 11.5 && lat <= 14.1) {
+                region = "ภาคตะวันออก";
+                pmValue = rand(22, 36, 1);
+                regionalAlert = { icon: "wind", color: "text-emerald-600 dark:text-emerald-400", title: "เขตพัฒนาเศรษฐกิจและชายฝั่งทะเล", desc: "มีลมทะเลถ่ายเท ระบบสาธารณูปโภคและเส้นทางคมนาคมหลักเชื่อมต่อสะดวก" };
+            }
+
+            const safety = rand(78, 91, 3);
+            const env = Math.max(58, 100 - Math.round(pmValue * 0.6));
+            const infra = rand(76, 92, 4);
+            const transit = rand(70, 88, 5);
+            const green = rand(75, 92, 6);
+            const overall = Math.round((safety + env + infra + transit + green) / 5);
+
+            const isLowRisk = overall >= 80;
+            const totalVotes = rand(35, 140, 7);
+            const c5 = Math.round(totalVotes * 0.48);
+            const c4 = Math.round(totalVotes * 0.32);
+            const c3 = Math.round(totalVotes * 0.13);
+            const c2 = Math.round(totalVotes * 0.05);
+            const c1 = Math.max(0, totalVotes - (c5 + c4 + c3 + c2));
+            const avgRating = (((c5*5)+(c4*4)+(c3*3)+(c2*2)+(c1*1)) / totalVotes).toFixed(1);
+
+            return {
+                title: title,
+                subtitle: `${province} (${region}) • พิกัด: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+                overall: overall,
+                grade: overall >= 82 ? "น่าอยู่อาศัยระดับดีมาก (A)" : "น่าอยู่อาศัยระดับดี (B+)",
+                riskBadge: isLowRisk 
+                    ? { text: "เสี่ยงต่ำ", class: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" }
+                    : { text: "เสี่ยงปานกลาง", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+                quick: { safety: `ดี (${safety}%)`, env: `ปานกลาง (${env}%)`, convenience: `ดี (${infra}%)` },
+                scores: { safety, env, infra, transit, green },
+                flood: { status: floodText, percent: floodPct },
+                pm: { status: `${pmValue} µg/m³ (${pmValue <= 37 ? 'ปานกลาง-ดี' : 'เริ่มมีผลกระทบ'})`, percent: Math.max(45, 100 - pmValue) },
+                hospital: `โรงพยาบาลประจำอำเภอ / รพ.รัฐใกล้เคียง (1.5 - 4.0 กม.)`,
+                police: `สถานีตำรวจภูธร / จุดบริการประชาชนในพื้นที่ (1.2 กม.)`,
+                transit: "รถโดยสารประจำทาง / ถนนสายหลักเชื่อมต่อจังหวัด",
+                traffic: { status: "คล่องตัว (หนาแน่นเฉพาะช่วงเช้า-เย็นหน้าตลาด/โรงเรียน)", percent: transit },
+                park: `สวนสาธารณะเทศบาล / ลานออกกำลังกายชุมชน (1.5 กม.)`,
+                noise: `เงียบสงบ ~ ${rand(48, 60, 8)} dB`,
+                alerts: [
+                    regionalAlert,
+                    { icon: "shield-check", color: "text-emerald-600 dark:text-emerald-400", title: "เครือข่ายความปลอดภัยชุมชน", desc: "ครอบคลุมพื้นที่ให้บริการของสถานีตำรวจ หน่วยกู้ชีพ 1669 และกล้อง CCTV จุดสำคัญ" }
+                ],
+                recommendations: [
+                    `พื้นที่ใน ${province} (${region}) มีบรรยากาศชุมชนเป็นมิตร เหมาะกับการอยู่อาศัยและประกอบอาชีพ`,
+                    "บันทึกเบอร์สายด่วนฉุกเฉิน 191 (ตำรวจ) และ 1669 (การแพทย์ฉุกเฉิน) ประจำจังหวัดไว้ใช้งาน",
+                    "ตรวจสอบเส้นทางเข้า-ออก และไฟส่องสว่างซอยย่อยหากต้องเดินทางช่วงเวลากลางคืน",
+                    "สามารถร่วมกดให้ดาวและรีวิวข้อมูลจริงด้านล่าง เพื่อช่วยอัปเดตข้อมูลให้คนในพื้นที่ได้"
+                ],
+                pins: [
+                    { type: "safety", label: "สถานีตำรวจ / จุดตรวจชุมชน", top: "32%", left: "38%" },
+                    { type: "health", label: "โรงพยาบาล / รพ.สต. ใกล้เคียง", top: "45%", left: "65%" },
+                    { type: "risk", label: "จุดเฝ้าระวังจราจรและระบายน้ำ", top: "68%", left: "48%" }
+                ],
+                votes: {
+                    total: totalVotes,
+                    avg: avgRating,
+                    counts: { 5: c5, 4: c4, 3: c3, 2: c2, 1: c1 },
+                    reviews: [
+                        { user: `คนในพื้นที่ (${province})`, rating: 5, tags: ["🛡️ ปลอดภัย ไฟสว่าง", "🍜 ของกินหาง่าย"], comment: `บรรยากาศดี ผู้คนเป็นมิตร เดินทางสะดวก มีตลาดและร้านค้าครบในชุมชน`, time: "1 วันที่แล้ว" },
+                        { user: "ผู้เดินทางผ่านพื้นที่", rating: 4, tags: ["👍 เดินทางสะดวก"], comment: "ถนนหนทางดี สัญญาณโทรศัพท์และอินเทอร์เน็ตครอบคลุม", time: "3 วันที่แล้ว" }
+                    ]
+                }
+            };
+        }
+
+        // GPS Geolocation Handler (Works anywhere in Thailand with Reverse Geocoding)
+        function useCurrentLocation() {
+            if (navigator.geolocation) {
+                showToast('กำลังดึงพิกัด GPS ปัจจุบันของคุณ...');
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        try {
+                            const revUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=th`;
+                            const res = await fetch(revUrl);
+                            const data = await res.json();
+                            const addr = data.address || {};
+
+                            const subdistrict = addr.suburb || addr.quarter || addr.village || addr.hamlet || "";
+                            const district = addr.city_district || addr.district || addr.county || addr.town || "";
+                            const province = addr.province || addr.state || addr.city || "ประเทศไทย";
+                            const fullName = [subdistrict, district, province].filter(Boolean).join(', ') || "ตำแหน่งปัจจุบันของคุณ (GPS)";
+
+                            const gpsKey = `gps_${lat.toFixed(3)}_${lng.toFixed(3)}`;
+                            if (!locationData[gpsKey]) {
+                                locationData[gpsKey] = generateThailandAreaProfile(fullName, province, lat, lng);
+                            }
+                            loadLocationData(gpsKey);
+                            showToast(`ระบุพิกัดสำเร็จ: ${fullName}`);
+                        } catch (e) {
+                            const gpsKey = `gps_${lat.toFixed(3)}_${lng.toFixed(3)}`;
+                            if (!locationData[gpsKey]) {
+                                locationData[gpsKey] = generateThailandAreaProfile("ตำแหน่งปัจจุบันของคุณ (GPS)", "ประเทศไทย", lat, lng);
+                            }
+                            loadLocationData(gpsKey);
+                            showToast('ระบุพิกัด GPS สำเร็จ!');
+                        }
+                    },
+                    (error) => {
+                        showToast('ไม่สามารถเข้าถึงตำแหน่งได้ ใช้ข้อมูลพื้นที่ตัวอย่าง');
+                        loadLocationData('korat');
+                    }
+                );
+            } else {
+                showToast('เบราว์เซอร์ไม่รองรับ GPS Geolocation');
+            }
+        }
+
+        // Toast Notification Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMsg');
+            msg.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
+```
